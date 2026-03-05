@@ -14,6 +14,7 @@ body{
   overflow:hidden;
   font-family: Arial, sans-serif;
   perspective:1000px;
+  cursor: pointer; /* подсказывает пользователю, что можно тапнуть */
 }
 
 #heart{
@@ -73,33 +74,29 @@ body{
 <div id="crown">👑</div>
 <div id="name">POLINA</div>
 
-<!-- музыка -->
-<audio autoplay loop>
+<audio id="bgMusic" loop>
   <source src="/lov.mp3" type="audio/mpeg">
 </audio>
 
 <script>
+// --- 3D сердце с текстом ---
 const heart = document.getElementById("heart");
-
 const text = "I LOVE YOU";
 const elements = 320;
 const scale = 16;
-
 let rotation = 0;
 let pulse = 1;
 
 const spans = [];
-
-for(let i = 0; i < elements; i++){
+for(let i=0;i<elements;i++){
   let span = document.createElement("span");
   span.className = "text";
   span.innerText = text;
   heart.appendChild(span);
-
   spans.push({
     el: span,
-    t: (i/elements) * Math.PI*2,
-    depth: (Math.random()-0.5) * 120
+    t: (i/elements)*Math.PI*2,
+    depth: (Math.random()-0.5)*120
   });
 }
 
@@ -107,10 +104,10 @@ function animate(){
   rotation += 0.6;
   pulse = 1 + Math.sin(rotation*0.05)*0.15;
 
-  spans.forEach(data => {
+  spans.forEach(data=>{
     const t = data.t;
     const x = 16*Math.pow(Math.sin(t),3);
-    const y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
+    const y = -(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
     const z = data.depth * Math.sin(t);
 
     data.el.style.transform = `
@@ -118,16 +115,30 @@ function animate(){
       rotateY(${-rotation}deg)
     `;
 
-    const opacity = (z + 120)/240;
+    const opacity = (z+120)/240;
     data.el.style.opacity = 0.4 + opacity;
   });
 
   heart.style.transform = `rotateX(12deg) rotateY(${rotation}deg)`;
-
   requestAnimationFrame(animate);
 }
 
 animate();
+
+// --- Музыка, запускается после одного тапа ---
+const music = document.getElementById("bgMusic");
+let musicStarted = false;
+
+function startMusic(){
+  if(!musicStarted){
+    music.play().catch(e=>console.log("Нужен пользовательский жест для звука"));
+    musicStarted = true;
+  }
+}
+
+// слушаем первый клик/тап по экрану
+document.body.addEventListener('click', startMusic, { once: true });
+document.body.addEventListener('touchstart', startMusic, { once: true });
 </script>
 
 </body>
