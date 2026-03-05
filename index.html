@@ -14,7 +14,7 @@ body{
   overflow:hidden;
   font-family: Arial, sans-serif;
   perspective:1000px;
-  cursor: pointer; /* подсказывает пользователю, что можно тапнуть */
+  cursor: pointer;
 }
 
 #heart{
@@ -22,7 +22,6 @@ body{
   transform-style:preserve-3d;
 }
 
-/* текст вокруг сердца */
 .text{
   position:absolute;
   color:#ff1744;
@@ -36,7 +35,6 @@ body{
   user-select:none;
 }
 
-/* имя в центре */
 #name{
   position:absolute;
   top:50%;
@@ -52,7 +50,6 @@ body{
   z-index:10;
 }
 
-/* корона над именем */
 #crown{
   position:absolute;
   top:50%;
@@ -70,16 +67,15 @@ body{
 <body>
 
 <div id="heart"></div>
-
 <div id="crown">👑</div>
 <div id="name">POLINA</div>
 
-<audio id="bgMusic" loop>
+<audio id="bgMusic" loop preload="auto">
   <source src="mp3/lov.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-// --- 3D сердце с текстом ---
+// --- 3D сердце ---
 const heart = document.getElementById("heart");
 const text = "I LOVE YOU";
 const elements = 320;
@@ -114,7 +110,6 @@ function animate(){
       translate3d(${x*scale*pulse}px, ${y*scale*pulse}px, ${z}px)
       rotateY(${-rotation}deg)
     `;
-
     const opacity = (z+120)/240;
     data.el.style.opacity = 0.4 + opacity;
   });
@@ -122,23 +117,24 @@ function animate(){
   heart.style.transform = `rotateX(12deg) rotateY(${rotation}deg)`;
   requestAnimationFrame(animate);
 }
-
 animate();
 
-// --- Музыка, запускается после одного тапа ---
+// --- ИСПРАВЛЕННЫЙ ЗВУК ---
 const music = document.getElementById("bgMusic");
-let musicStarted = false;
 
-function startMusic(){
-  if(!musicStarted){
-    music.play().catch(e=>console.log("Нужен пользовательский жест для звука"));
-    musicStarted = true;
-  }
+function initAudio() {
+  music.play().then(() => {
+    // Если заиграло, удаляем обработчики
+    ['click', 'touchstart', 'mousedown'].forEach(ev => {
+      document.removeEventListener(ev, initAudio);
+    });
+  }).catch(e => console.log("Ждем взаимодействия..."));
 }
 
-// слушаем первый клик/тап по экрану
-document.body.addEventListener('click', startMusic, { once: true });
-document.body.addEventListener('touchstart', startMusic, { once: true });
+// Слушаем любые жесты для разблокировки аудио
+['click', 'touchstart', 'mousedown'].forEach(ev => {
+  document.addEventListener(ev, initAudio);
+});
 </script>
 
 </body>
