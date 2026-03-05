@@ -3,84 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <title>Love</title>
-
 <style>
-
 body{
-margin:0;
-background:radial-gradient(circle at center,#1a0010,#000000);
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-overflow:hidden;
-font-family:Arial;
-perspective:1000px;
+  margin:0;
+  background: radial-gradient(circle at center, #1a0010, #000000);
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  font-family: Arial, sans-serif;
+  perspective:1000px;
 }
 
 #heart{
-position:absolute;
-transform-style:preserve-3d;
+  position:absolute;
+  transform-style:preserve-3d;
 }
 
-/* текст сердца */
-
+/* текст вокруг сердца */
 .text{
-position:absolute;
-color:#ff1744;
-font-size:14px;
-white-space:nowrap;
-
-text-shadow:
-0 0 5px #ff1744,
-0 0 10px #ff1744,
-0 0 20px #ff1744,
-0 0 40px #ff1744;
-
-user-select:none;
+  position:absolute;
+  color:#ff1744;
+  font-size:14px;
+  white-space:nowrap;
+  text-shadow:
+    0 0 5px #ff1744,
+    0 0 10px #ff1744,
+    0 0 20px #ff1744,
+    0 0 40px #ff1744;
+  user-select:none;
 }
 
-/* имя */
-
+/* имя в центре */
 #name{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-
-font-size:55px;
-font-weight:bold;
-color:#ff4d6d;
-
-text-shadow:
-0 0 10px #ff4d6d,
-0 0 25px #ff4d6d,
-0 0 50px #ff4d6d;
-
-z-index:10;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  font-size:55px;
+  font-weight:bold;
+  color:#ff4d6d;
+  text-shadow:
+    0 0 10px #ff4d6d,
+    0 0 25px #ff4d6d,
+    0 0 50px #ff4d6d;
+  z-index:10;
 }
 
-/* корона */
-
+/* корона над именем */
 #crown{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-160%);
-
-font-size:70px;
-
-text-shadow:
-0 0 10px gold,
-0 0 25px gold,
-0 0 40px gold;
-
-z-index:10;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -160%);
+  font-size:70px;
+  text-shadow:
+    0 0 10px gold,
+    0 0 25px gold,
+    0 0 40px gold;
+  z-index:10;
 }
-
 </style>
 </head>
-
 <body>
 
 <div id="heart"></div>
@@ -89,81 +74,60 @@ z-index:10;
 <div id="name">POLINA</div>
 
 <!-- музыка -->
-
 <audio autoplay loop>
-<source src="/lov.mp3">
+  <source src="/lov.mp3" type="audio/mpeg">
 </audio>
 
 <script>
+const heart = document.getElementById("heart");
 
-const heart=document.getElementById("heart")
+const text = "I LOVE YOU";
+const elements = 320;
+const scale = 16;
 
-const text="I LOVE YOU"
-const elements=320
-const scale=16
+let rotation = 0;
+let pulse = 1;
 
-let rotation=0
-let pulse=1
+const spans = [];
 
-const spans=[]
+for(let i = 0; i < elements; i++){
+  let span = document.createElement("span");
+  span.className = "text";
+  span.innerText = text;
+  heart.appendChild(span);
 
-for(let i=0;i<elements;i++){
-
-let span=document.createElement("span")
-
-span.className="text"
-span.innerText=text
-
-heart.appendChild(span)
-
-spans.push({
-
-el:span,
-t:(i/elements)*Math.PI*2,
-depth:(Math.random()-0.5)*120
-
-})
-
+  spans.push({
+    el: span,
+    t: (i/elements) * Math.PI*2,
+    depth: (Math.random()-0.5) * 120
+  });
 }
 
 function animate(){
+  rotation += 0.6;
+  pulse = 1 + Math.sin(rotation*0.05)*0.15;
 
-rotation+=0.6
+  spans.forEach(data => {
+    const t = data.t;
+    const x = 16*Math.pow(Math.sin(t),3);
+    const y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
+    const z = data.depth * Math.sin(t);
 
-pulse=1+Math.sin(rotation*0.05)*0.15
+    data.el.style.transform = `
+      translate3d(${x*scale*pulse}px, ${y*scale*pulse}px, ${z}px)
+      rotateY(${-rotation}deg)
+    `;
 
-spans.forEach(data=>{
+    const opacity = (z + 120)/240;
+    data.el.style.opacity = 0.4 + opacity;
+  });
 
-const t=data.t
+  heart.style.transform = `rotateX(12deg) rotateY(${rotation}deg)`;
 
-let x=16*Math.pow(Math.sin(t),3)
-let y=-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))
-
-const z=data.depth*Math.sin(t)
-
-data.el.style.transform=`
-
-translate3d(${x*scale*pulse}px,
-${y*scale*pulse}px,
-${z}px)
-
-rotateY(${-rotation}deg)
-
-`
-
-const opacity=(z+120)/240
-data.el.style.opacity=0.4+opacity
-
-})
-
-heart.style.transform=`rotateX(12deg) rotateY(${rotation}deg)`
-
-requestAnimationFrame(animate)
-
+  requestAnimationFrame(animate);
 }
 
-animate()
-
+animate();
 </script>
 
 </body>
